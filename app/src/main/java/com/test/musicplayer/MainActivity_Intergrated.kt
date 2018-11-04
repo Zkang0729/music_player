@@ -115,6 +115,8 @@ class MainActivity_Intergrated : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.playlist_layout)
         val context = this
+        recyclerView.layoutManager = LinearLayoutManager(context)
+
 
         //progressBar = findViewById(R.id.progress_bar);
 
@@ -148,69 +150,70 @@ class MainActivity_Intergrated : AppCompatActivity() {
                     val jsonObject = JSONObject(json)
                     val playList = jsonObject.getJSONArray("items")
                     for (i in 0 until playList.length()){
-                        val playListId = playList.getJSONObject(i).getJSONObject("id").getString("id")
+                        val playListId = playList.getJSONObject(i).getString("id")
                         playListArray.add(playListId)
                     }
                 } catch (e: JSONException) {
                     e.printStackTrace()
                 }
 
+                for (j in playListArray.indices) {
+                    val request2 = Request.Builder()
+                        .url("https://api.spotify.com/v1/playlists/" + playListArray[j] + "/tracks")
+                        .addHeader("Authorization", "Bearer " + authToken!!)
+                        .build()
+
+                    client.newCall(request2).enqueue(object : Callback {
+                        internal var handler = Handler(context.mainLooper)
+
+                        override fun onFailure(call: Call, e: IOException) {
+                            e.printStackTrace()
+                        }
+
+                        @Throws(IOException::class)
+                        override fun onResponse(call: Call, response: Response) {
+
+                            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+                            val json2 = response.body().string()
+
+                            Log.v("Response", json2)
+
+                            try {
+                                val jsonObject2 = JSONObject(json2)
+                                val items2 = jsonObject2.getJSONArray("items")
+                                for (k in 0 until items2.length()) {
+                                    val albumName = items2.getJSONObject(k).getJSONObject("track").getJSONObject("album")
+                                        .getString("name")
+                                    val artistName = items2.getJSONObject(k).getJSONObject("track").getJSONArray("artists")
+                                        .getJSONObject(0).getString("name")
+                                    val songName = items2.getJSONObject(k).getJSONObject("track").getString("name")
+                                    val websiteURL = items2.getJSONObject(k).getJSONObject("track").getString("preview_url")
+                                    songArray.add(SongInfo(songName, artistName, albumName, websiteURL))
+                                }
+                            } catch (e: JSONException) {
+                                e.printStackTrace()
+                            }
+
+                            /* setSupportActionBar(toolbar) */
+                            val posts: ArrayList<Post> = ArrayList()
+                            for (i in 0 until songArray.size) {
+                                posts.add(
+                                    Post(songArray[i].getSongName(), songArray[i].getArtistName(), songArray[i].getAlbumName(),
+                                        songArray[i].getURL())
+                                )
+                            }
+
+                            runOnUiThread {
+                                // Stuff that updates the UI
+                                recyclerView.adapter = CustomAdapter(posts)
+                            }
+                        }
+                    })
+                }
+
             }
         })
-
-        for (j in playListArray.indices) {
-            val request2 = Request.Builder()
-                .url(playListArray[j])
-                .addHeader("Authorization", "Bearer " + authToken!!)
-                .build()
-
-            client.newCall(request).enqueue(object : Callback {
-                internal var handler = Handler(context.mainLooper)
-
-                override fun onFailure(call: Call, e: IOException) {
-                    e.printStackTrace()
-                }
-
-                @Throws(IOException::class)
-                override fun onResponse(call: Call, response: Response) {
-
-                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
-
-                    val json2 = response.body().string()
-
-                    Log.v("Response", json2)
-
-                    try {
-                        val jsonObject2 = JSONObject(json2)
-                        val items2 = jsonObject2.getJSONArray("items")
-                        for (k in 0 until items2.length()) {
-                            val songName = items2.getJSONArray(k).getJSONObject(4).getJSONObject("album")
-                                    .getJSONObject("name").getString("name")
-                            val artistName = items2.getJSONArray(k).getJSONObject(4).getJSONArray("artist")
-                                    .getJSONObject(0).getJSONObject("name").getString("name")
-                            val albumName = items2.getJSONArray(k).getJSONObject(4).getJSONArray("artist")
-                                    .getJSONObject(1).getJSONObject("name").getString("name")
-                            val websiteURL = items2.getJSONArray(k).getJSONObject(4).getJSONObject("preview_url")
-                                    .getString("preview_url")
-                            songArray.add(SongInfo(songName, artistName, albumName, websiteURL))
-                        }
-                    } catch (e: JSONException) {
-                        e.printStackTrace()
-                    }
-
-                }
-            })
-        }
-        /* setSupportActionBar(toolbar) */
-        val posts: ArrayList<Post> = ArrayList()
-        for (i in 1..songArray.size) {
-            posts.add(
-                Post(songArray[i].getSongName(), songArray[i].getArtistName(), songArray[i].getAlbumName(),
-                    songArray[i].getURL())
-            )
-        }
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = CustomAdapter(posts)
 
     }
 
