@@ -18,12 +18,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
         LoginButton.setOnClickListener {
-            val password = passwordField.text.toString()
-            Log.d("Harry", "Password is: $password")
-            if (password == "Ffckffck5678910"){
-                Log.d("Harry", "Success! Your password is valid! :)")
-                startActivity(Intent(this,PlayList::class.java))
-            }
+            startActivity(Intent(this@MainActivity, LoginActivity::class.java))
         }
     }
 }

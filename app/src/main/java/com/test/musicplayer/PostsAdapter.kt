@@ -1,9 +1,14 @@
 package com.test.musicplayer
 
+import android.media.AudioManager
+import android.media.MediaPlayer
+import android.net.Uri
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import com.test.musicplayer.R.id.playButton
 import com.test.musicplayer.module.Post
 import kotlinx.android.synthetic.main.songs_layout.view.*
 
@@ -49,11 +54,17 @@ class CustomAdapter(val userList: ArrayList<Post>) : RecyclerView.Adapter<Custom
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         fun bindItems(user: Post) {
-            itemView.songName.text=user.songName
-            itemView.artistName.text=user.artistName
-            itemView.albumName.text=user.albumName
-
+            itemView.songName.text = user.songName
+            itemView.artistName.text = user.artistName
+            itemView.albumName.text = user.albumName
+            val url = user.songs
+            val mediaPlayer: MediaPlayer? = MediaPlayer().apply {
+                AudioManager.STREAM_MUSIC
+                setDataSource(url)
+                prepare() // might take long! (for buffering, etc)
+                start()
+            }
         }
-    }
 
+    }
 }
