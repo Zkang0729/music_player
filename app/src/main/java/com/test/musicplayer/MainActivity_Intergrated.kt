@@ -1,5 +1,6 @@
 package com.test.musicplayer
 
+import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.os.Handler
@@ -11,6 +12,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.*
+import android.widget.Button
 import android.widget.ListView
 import android.widget.ProgressBar
 import com.test.musicplayer.module.Post
@@ -146,7 +148,7 @@ class MainActivity_Intergrated : AppCompatActivity() {
                     val jsonObject = JSONObject(json)
                     val playList = jsonObject.getJSONArray("items")
                     for (i in 0 until playList.length()){
-                        val playListId = playList.getJSONObject(3).getString("id")
+                        val playListId = playList.getJSONObject(i).getJSONObject("id").getString("id")
                         playListArray.add(playListId)
                     }
                 } catch (e: JSONException) {
@@ -182,13 +184,14 @@ class MainActivity_Intergrated : AppCompatActivity() {
                         val jsonObject2 = JSONObject(json2)
                         val items2 = jsonObject2.getJSONArray("items")
                         for (k in 0 until items2.length()) {
-                            val songName = items2.getJSONArray(4).getJSONArray(0).getJSONObject(7)
-                                    .getString("name")
-                            val artistName = items2.getJSONArray(4).getJSONArray(1).getJSONArray(0)
-                                    .getJSONObject(3).getString("name")
-                            val albumName = items2.getJSONArray(4).getJSONArray(1).getJSONArray(1)
-                                    .getJSONObject(3).getString("name")
-                            val websiteURL = items2.getJSONArray(4).getJSONObject(15).getString("preview_URL")
+                            val songName = items2.getJSONArray(k).getJSONObject(4).getJSONObject("album")
+                                    .getJSONObject("name").getString("name")
+                            val artistName = items2.getJSONArray(k).getJSONObject(4).getJSONArray("artist")
+                                    .getJSONObject(0).getJSONObject("name").getString("name")
+                            val albumName = items2.getJSONArray(k).getJSONObject(4).getJSONArray("artist")
+                                    .getJSONObject(1).getJSONObject("name").getString("name")
+                            val websiteURL = items2.getJSONArray(k).getJSONObject(4).getJSONObject("preview_url")
+                                    .getString("preview_url")
                             songArray.add(SongInfo(songName, artistName, albumName, websiteURL))
                         }
                     } catch (e: JSONException) {
@@ -215,3 +218,6 @@ class MainActivity_Intergrated : AppCompatActivity() {
         private val CLIENT_ID = "6c6016da831348e18df08257e074c9c4"
     }
 }
+
+
+

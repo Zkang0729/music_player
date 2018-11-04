@@ -48,6 +48,7 @@ dependencies {
     implementation project(':spotify-auth-1.0.0-beta13')
     implementation project(':spotify-player-1.0.0-beta13')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    apply plugin: "kotlin-android-extensions"
 }
 repositories {
     mavenCentral()
